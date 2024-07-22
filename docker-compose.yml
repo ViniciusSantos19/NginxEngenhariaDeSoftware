@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  nginx:
+    build:
+      context: ./Nginx
+    ports:
+      - "80:80"
+    networks:
+      - my-network
+    depends_on:
+      - funcionario
+      - estoque
+
+  funcionario:
+    image: pedrop8/servico-funcionario
+    container_name: funcionario
+    ports:
+      - "8080:8080"
+    networks:
+      - my-network
+
+  db:
+    image: postgres:14.2-alpine
+    container_name: db-estoque22
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: microservico_estoque_development
+      POSTGRES_USER: vinicius
+      POSTGRES_PASSWORD: 123
+    ports:
+      - "5434:5432"
+    networks:
+        - my-network
+
+  estoque:
+    container_name: estoque
+    image: viniciusr21/mc-rails123:atualizado
+    env_file: .env
+    command: "bundle exec rails s -p 3000 -b '0.0.0.0'"
+    environment:
+      DB_HOST: db
+      DB_NAME: microservico_estoque_development
+      DB_USERNAME: vinicius
+      DB_PASSWORD: 123
+    volumes:
+      - .:/app:cached
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    networks:
+        - my-network
+
+networks:
+  my-network:
+
+volumes:
+  postgres_data:
