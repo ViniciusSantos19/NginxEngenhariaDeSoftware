@@ -1,0 +1,2 @@
+docker exec -it dbf860d6a026 ./bin/rails db:seed
+docker exec -it dbf860d6a026 ./bin/rails db:migrate
