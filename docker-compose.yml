@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   nginx:
     build:
@@ -31,9 +29,9 @@ services:
       POSTGRES_USER: vinicius
       POSTGRES_PASSWORD: 123
     ports:
-      - "5434:5432"
+      - "5434:5434"
     networks:
-        - my-network
+      - my-network
 
   estoque:
     container_name: estoque
@@ -52,20 +50,20 @@ services:
     depends_on:
       - db
     networks:
-        - my-network
+      - my-network
   
-  app:
-    build:
-      context: .
-    container_name: barbearia
+  servico:
+    image: jdpaes/services-barbearia:latest
     depends_on:
       - postgres
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5433/postgres
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/postgres
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=password
     ports:
-      - 8081:8081
+      - "8081:8080"
+    networks:
+        - my-network
 
   postgres:
     image: postgres:16
@@ -75,10 +73,18 @@ services:
     volumes:
       - postgres-db-volume:/var/lib/postgresql/data
     ports:
-      - 5433:5433
+      - "5432:5432"
+    networks:
+      - my-network
 
 networks:
   my-network:
 
 volumes:
   postgres_data:
+  postgres-db-volume:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./postgresql
