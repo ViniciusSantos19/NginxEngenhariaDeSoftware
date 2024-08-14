@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   nginx:
     build:
@@ -11,6 +9,7 @@ services:
     depends_on:
       - funcionario
       - estoque
+      - renatos-barbershop
 
   funcionario:
     image: pedrop8/servico-funcionario
@@ -31,7 +30,7 @@ services:
       POSTGRES_USER: vinicius
       POSTGRES_PASSWORD: 123
     ports:
-      - "5434:5432"
+      - "5434:5433"
     networks:
         - my-network
 
@@ -54,8 +53,34 @@ services:
     networks:
         - my-network
 
+  postgres:
+    image: postgres:latest
+    restart: always
+    ports:
+      - "5432:5435"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: renatos_barbershop_db
+    volumes:
+      - postgres_data_luis_felipe:/var/lib/postgresql/data
+    networks:
+        - my-network
+
+  renatos-barbershop:
+    image: luizfelipetorresfarias/renatos-barbershop:latest
+    depends_on:
+      - postgres
+    env_file:
+      - .env-dockerfile
+    ports:
+      - "8081:8081"
+    networks:
+      - my-network
+
 networks:
   my-network:
 
 volumes:
   postgres_data:
+  postgres_data_luis_felipe:
