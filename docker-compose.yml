@@ -32,13 +32,13 @@ services:
     ports:
       - "5434:5433"
     networks:
-        - my-network
+      - my-network
 
   estoque:
     container_name: estoque
     image: viniciusr21/mc-rails123:atualizado
     env_file: .env
-    command: "bundle exec rails s -p 3000 -b '0.0.0.0'"
+    command: "bundle exec rails s -p 3001 -b '0.0.0.0'"
     environment:
       DB_HOST: db
       DB_NAME: microservico_estoque_development
@@ -47,11 +47,11 @@ services:
     volumes:
       - .:/app:cached
     ports:
-      - "3000:3000"
+      - "3001:3001"
     depends_on:
       - db
     networks:
-        - my-network
+      - my-network
 
   postgres:
     image: postgres:latest
@@ -65,7 +65,7 @@ services:
     volumes:
       - postgres_data_luis_felipe:/var/lib/postgresql/data
     networks:
-        - my-network
+      - my-network
 
   renatos-barbershop:
     image: luizfelipetorresfarias/renatos-barbershop:latest
@@ -75,6 +75,38 @@ services:
       - .env-dockerfile
     ports:
       - "8081:8081"
+    networks:
+      - my-network
+
+  db-loyalty:
+    image: postgres:15.5-alpine
+    ports:
+      - "5436:5436"
+    volumes:
+      - ../tmp/db:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: barber-loyalty
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: barber-loyalty-dev
+    networks:
+      - my-network
+
+  loyalty:
+    image: gcarvalhof/barber-loyalty-inf-016:0.0.2
+    stdin_open: true
+    tty: true
+    volumes:
+      - ..:/app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db-loyalty
+    environment:
+      USERNAME: barber-loyalty
+      PASSWORD: password
+      HOSTNAME: db-loyalty
+      DB_PORT: 5436
+      DB_NAME: barber-loyalty-dev
     networks:
       - my-network
 
